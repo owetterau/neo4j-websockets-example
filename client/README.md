@@ -14,9 +14,8 @@ To run this example to need at least one example server available.
 
 Setup for Your Application
 --------------------------
-#### Start up: Application
-You need an entry point for an executable jar which includes the start up methods for Spring Boot and for the embedded
-Neo4j server.
+### Startup: Application
+You need an entry point for an executable jar which includes the start up methods for Spring Boot.
 
 ```java
 @SpringBootApplication
@@ -24,47 +23,28 @@ Neo4j server.
 @EnableWebMvc
 public class Application {
     public static void main(String[] arguments) throws Exception {
+        ApplicationSettings.setServerURIs(System.getProperty("database.server.uris").split(","));
         SpringApplication.run(Application.class, arguments);
     }
 }
 ```
 
-#### DatabaseUri
-A bean implementing ```ServerUri``` must be provided so that the client knows to which servers it shall connect to.
+In this example the list of available servers is passed using a Java VM Option "database.server.uris".
 
-```getServerUris``` must return a list of URIs pointing to a websocket (e.g. ws://localhost:9090).
+### Result
+The `Result` class is used for all results being returned from a Neo4j server. Its serialization behaviour can be changed by overwriting the default `ThreadLocale` and `JsonObjectSerializer` implementations.
 
-```java
-@Service
-public class DatabaseUri implements ServerUri {
-    protected String[] uris;
+#### Managing Locales for Results: ThreadLocale
+The default locale for all request is `Locale.US` and is provided through `DefaultThreadLocale`. This default behaviour can be changed by creating a new class implementing the `ThreadLocale` interface. To override the default bean the new class must be annotated with `@Component` and `@Primary`.
 
-    @Autowired
-    public DatabaseUri(@Value("${database.server.uris}") String uri) {
-        uris = uri.split(",");
-    }
-
-    public String[] getServerUris() {
-        return uris;
-    }
-}
-```
-
-In this example the list of available servers is passed using a Java VM Option "database.server.uris" being passed into
-the constructor.
-
-#### Managing Locales for Results: ExampleThreadLocale
-A bean implementing the ```ThreadLocale``` interface must be provided.
-
-Here is a simple example of how the locale that shall be used by the ```Result``` class.
-
-If you don't need different locales just implement a class return your default locale all the time...
+Here is a simple example that changes the default locale from `Local.US` to `Locale.GERMAN`:
 
 ```java
-@Service
+@Primary
+@Component
 public class ExampleThreadLocale implements ThreadLocale {
     protected static ThreadLocal<Locale> threadLocal = new ThreadLocal<>();
-    protected static Locale defaultLocale = Locale.ENGLISH;
+    protected static Locale defaultLocale = Locale.GERMAN;
 
     @Override
     public void setLocale(Locale locale) {
@@ -80,14 +60,14 @@ public class ExampleThreadLocale implements ThreadLocale {
 }
 ```
 
-#### Custom Json Serialization for Results: ExampleJsonSerializers
-A bean implementing the ```JsonObjectSerializers``` interface must be provided.
+#### Custom Json Serialization for Results: JsonSerializers
+The default serialization does not include any specific serializers of your application. If you are happy with that, then there is no need for change. Otherwise, you have the option to add custom serializers and deserializers.
 
-If you don't need custom (de-)serializers to be used by the ```Result``` class just return empty maps as shown in this
-example.
+Just create a class implementing the `JsonObjectSerializers` interface and override the default bean by annotating your class with `@Component` and `@Primary`:
 
 ```java
-@Service
+@Primary
+@Component
 public class ExampleJsonSerializers implements JsonObjectSerializers {
     @Override
     public Map<Class, JsonSerializer> getSerializers() {
@@ -105,7 +85,7 @@ Calling the Server
 ------------------
 In a Neo4j cluster only one server should be used for write access to get the best possible overall performance.
 
-To allow the websocket framework to automatically chose the correct server, the ```DatabaseServer``` provides
+To allow the websocket framework to automatically chose the correct server, `DatabaseService` provides
 different functions to access the database servers.
 
 #### Call With Write Access

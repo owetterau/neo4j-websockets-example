@@ -6,27 +6,25 @@
 
     <groupId>de.oliverwetterau.neo4j</groupId>
     <artifactId>websocket-examples.client</artifactId>
-    <version>0.8.0</version>
+    <version>0.9.1</version>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.2.5.RELEASE</version>
+        <version>1.2.7.RELEASE</version>
     </parent>
 
     <properties>
         <java.version>1.8</java.version>
 
-        <websockets.client.version>0.8.19</websockets.client.version>
+        <websockets.version>0.9.1</websockets.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>de.oliverwetterau.neo4j</groupId>
-            <artifactId>websockets-server</artifactId>
-            <version>${websockets.client.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/neo4j-websockets-client.jar</systemPath>
+            <artifactId>websockets-client</artifactId>
+            <version>${websockets.version}</version>
         </dependency>
 
         <dependency>
@@ -75,24 +73,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.3</version>
                 <configuration>
                     <compilerVersion>${java.version}</compilerVersion>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.1</version>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

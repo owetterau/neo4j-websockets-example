@@ -6,105 +6,74 @@
 
     <groupId>de.oliverwetterau.neo4j</groupId>
     <artifactId>websocket-examples-server</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
     <packaging>jar</packaging>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.2.6.RELEASE</version>
-    </parent>
-
     <properties>
-        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.7</java.version>
+        <complianceLevel>${java.version}</complianceLevel>
 
-        <websockets.client.version>0.9.0</websockets.client.version>
+        <websockets.version>0.9.1</websockets.version>
+        <neo4j.version>2.3.1</neo4j.version>
+        <spring.version>4.1.8.RELEASE</spring.version>
         <aspectj.version>1.8.7</aspectj.version>
-        <neo4j.version>2.2.5</neo4j.version>
+        <junit.version>4.12</junit.version>
     </properties>
 
     <dependencies>
+        <!-- Neo4j Websockets Plugin ******************************************************************************* -->
+
         <dependency>
             <groupId>de.oliverwetterau.neo4j</groupId>
             <artifactId>websockets-server</artifactId>
-            <version>${websockets.client.version}</version>
+            <version>${websockets.version}</version>
+        </dependency>
+
+        <!-- Neo4j ************************************************************************************************* -->
+
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j</artifactId>
+            <version>${neo4j.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-enterprise</artifactId>
             <version>${neo4j.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.neo4j.app</groupId>
             <artifactId>neo4j-server-enterprise</artifactId>
             <version>${neo4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.neo4j.app</groupId>
-            <artifactId>neo4j-server</artifactId>
-            <version>${neo4j.version}</version>
-            <classifier>static-web</classifier>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
             <version>${neo4j.version}</version>
-            <classifier>tests</classifier>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Testing *********************************************************************************************** -->
+
+        <dependency>
+            <groupId>org.neo4j.test</groupId>
+            <artifactId>neo4j-harness</artifactId>
+            <version>${neo4j.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>${aspectj.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjtools</artifactId>
-            <version>${aspectj.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-smile</artifactId>
-            <version>2.5.3</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -115,19 +84,50 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.3</version>
                 <configuration>
                     <compilerVersion>${java.version}</compilerVersion>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <fork>true</fork>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>de.oliverwetterau.neo4j.websockets.server.WebsocketsKernelExtensionFactory</Main-Class>
+                                    </manifestEntries>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.handlers</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.schemas</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.factories</resource>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>
-                <version>1.7</version>
+                <version>1.8</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -161,14 +161,9 @@
                     <dependency>
                         <groupId>org.aspectj</groupId>
                         <artifactId>aspectjweaver</artifactId>
-                        <version>1.8.5</version>
+                        <version>${aspectj.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

@@ -7,9 +7,7 @@ import de.oliverwetterau.neo4j.websockets.core.data.Result;
 import de.oliverwetterau.neo4j.websockets.server.annotations.MessageController;
 import de.oliverwetterau.neo4j.websockets.server.annotations.MessageMethod;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 @MessageController("actors")
 public class ActorsController {
     protected final ActorsService actorsService;

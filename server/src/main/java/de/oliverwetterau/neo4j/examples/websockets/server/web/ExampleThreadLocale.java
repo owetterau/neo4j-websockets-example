@@ -1,11 +1,9 @@
-package de.oliverwetterau.neo4j.examples.websockets.server;
+package de.oliverwetterau.neo4j.examples.websockets.server.web;
 
 import de.oliverwetterau.neo4j.websockets.core.i18n.ThreadLocale;
-import org.springframework.stereotype.Service;
 
 import java.util.Locale;
 
-@Service
 public class ExampleThreadLocale implements ThreadLocale {
     protected static ThreadLocal<Locale> threadLocal = new ThreadLocal<>();
     protected static Locale defaultLocale = Locale.ENGLISH;
